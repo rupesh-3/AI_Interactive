@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}AI Content Analyzer - Intelligent Summarization & Q&A{% endblock %}
+
+{% block content %}
+<div class="hero-section bg-gradient-primary text-white py-5 mb-5">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-brain me-3"></i>AI Content Analyzer
+                </h1>
+                <p class="lead mb-4">
+                    Transform any web article into concise summaries and get intelligent answers to your questions using advanced AI technology.
+                </p>
+                <div class="feature-badges d-flex flex-wrap justify-content-center gap-2 mb-4">
+                    <span class="badge bg-light text-primary px-3 py-2">
+                        <i class="fas fa-compress-alt me-1"></i>Smart Summarization
+                    </span>
+                    <span class="badge bg-light text-primary px-3 py-2">
+                        <i class="fas fa-question-circle me-1"></i>Intelligent Q&A
+                    </span>
+                    <span class="badge bg-light text-primary px-3 py-2">
+                        <i class="fas fa-mobile-alt me-1"></i>Mobile Friendly
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- URL Input Form -->
+            <div class="card shadow-lg border-0 mb-5">
+                <div class="card-header bg-primary text-white py-3">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-link me-2"></i>Analyze Content
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('analyze_content') }}" method="POST" id="urlForm">
+                        <div class="mb-4">
+                            <label for="url" class="form-label fw-semibold">
+                                <i class="fas fa-globe me-2 text-primary"></i>Website URL
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text">
+                                    <i class="fas fa-link text-muted"></i>
+                                </span>
+                                <input 
+                                    type="url" 
+                                    class="form-control" 
+                                    id="url" 
+                                    name="url" 
+                                    placeholder="https://example.com/article" 
+                                    required
+                                    autocomplete="url"
+                                >
+                            </div>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Enter the URL of any web article you'd like to analyze
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                                <i class="fas fa-magic me-2"></i>Analyze Content
+                                <span class="spinner-border spinner-border-sm ms-2 d-none" id="loadingSpinner"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- How It Works Section -->
+            <div class="card border-0 shadow-sm mb-5">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-center mb-4">
+                        <i class="fas fa-cogs me-2 text-primary"></i>How It Works
+                    </h4>
+                    <div class="row g-4">
+                        <div class="col-md-4 text-center">
+                            <div class="feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                <i class="fas fa-paste text-primary fs-4"></i>
+                            </div>
+                            <h5>1. Paste URL</h5>
+                            <p class="text-muted small">
+                                Simply paste the URL of any web article you want to analyze
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="feature-icon bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                <i class="fas fa-robot text-success fs-4"></i>
+                            </div>
+                            <h5>2. AI Analysis</h5>
+                            <p class="text-muted small">
+                                Our advanced AI extracts and summarizes the key points
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="feature-icon bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                                <i class="fas fa-comments text-info fs-4"></i>
+                            </div>
+                            <h5>3. Ask Questions</h5>
+                            <p class="text-muted small">
+                                Get intelligent answers to specific questions about the content
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-compress-alt text-primary"></i>
+                                </div>
+                                <h5 class="mb-0">Smart Summarization</h5>
+                            </div>
+                            <p class="text-muted mb-0">
+                                Get concise, intelligent summaries that capture the essence of long articles in seconds.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                                    <i class="fas fa-question-circle text-success"></i>
+                                </div>
+                                <h5 class="mb-0">Intelligent Q&A</h5>
+                            </div>
+                            <p class="text-muted mb-0">
+                                Ask specific questions and get detailed, contextual answers from the content.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Examples Section -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="card-title text-center mb-4">
+                        <i class="fas fa-lightbulb me-2 text-warning"></i>Example URLs to Try
+                    </h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="example-url p-3 bg-light rounded cursor-pointer" onclick="fillUrl('https://www.bbc.com/news')">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-newspaper text-primary me-2"></i>
+                                    <div>
+                                        <strong>News Articles</strong>
+                                        <br><small class="text-muted">BBC, CNN, Reuters</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="example-url p-3 bg-light rounded cursor-pointer" onclick="fillUrl('https://en.wikipedia.org/wiki/Artificial_intelligence')">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-book text-success me-2"></i>
+                                    <div>
+                                        <strong>Educational Content</strong>
+                                        <br><small class="text-muted">Wikipedia, Academic papers</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function fillUrl(url) {
+    document.getElementById('url').value = url;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Dashboard - AI Content Analyzer{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>Performance Dashboard
+                    </h2>
+                    <p class="text-muted mb-0">
+                        AI model accuracy monitoring and quality metrics
+                    </p>
+                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-home me-1"></i>Back to Analyzer
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if performance.get('error') %}
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Error loading performance data: {{ performance.error }}
+    </div>
+    {% elif performance.get('message') %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i>
+        {{ performance.message }}
+    </div>
+    {% else %}
+    
+    <!-- Overall Performance Summary -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-bullseye me-2"></i>90% Accuracy Target Status
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="accuracy-metric p-3">
+                                <div class="metric-value display-6 fw-bold 
+                                    {% if performance.overall_accuracy >= 0.9 %}text-success{% elif performance.overall_accuracy >= 0.7 %}text-warning{% else %}text-danger{% endif %}">
+                                    {{ "%.1f"|format(performance.overall_accuracy * 100) }}%
+                                </div>
+                                <div class="metric-label text-muted">Overall Accuracy</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="accuracy-metric p-3">
+                                <div class="metric-status display-6">
+                                    {% if performance.meets_90_percent_target %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-times-circle text-danger"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="metric-label text-muted">Target Achievement</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="accuracy-metric p-3">
+                                <div class="metric-value display-6 fw-bold text-info">
+                                    {{ performance.total_operations }}
+                                </div>
+                                <div class="metric-label text-muted">Total Operations</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        {% if performance.meets_90_percent_target %}
+                            <div class="alert alert-success border-0" style="background: rgba(76, 175, 80, 0.1);">
+                                <i class="fas fa-trophy me-2"></i>
+                                <strong>Excellent!</strong> The AI models are consistently achieving the 90% accuracy target for both summarization and question answering.
+                            </div>
+                        {% elif performance.overall_accuracy >= 0.8 %}
+                            <div class="alert alert-warning border-0" style="background: rgba(255, 160, 0, 0.1);">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Good Progress!</strong> Performance is strong but not yet consistently meeting the 90% target. Continue monitoring and optimization.
+                            </div>
+                        {% else %}
+                            <div class="alert alert-danger border-0" style="background: rgba(255, 82, 82, 0.1);">
+                                <i class="fas fa-warning me-2"></i>
+                                <strong>Needs Improvement!</strong> Performance is below target. Consider model fine-tuning or algorithm enhancements.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tools me-2"></i>Performance Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Test New Content
+                        </a>
+                        <a href="{{ url_for('history') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-history me-2"></i>View History
+                        </a>
+                        <button class="btn btn-outline-info" onclick="location.reload()">
+                            <i class="fas fa-sync me-2"></i>Refresh Data
+                        </button>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Performance data updates in real-time as you use the analyzer.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Metrics -->
+    <div class="row">
+        <!-- Summarization Performance -->
+        {% if performance.summarization %}
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background: var(--gradient-primary); color: white;">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-compress-alt me-2"></i>Summarization Performance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="metric-box text-center p-3 bg-light rounded">
+                                <div class="metric-number h4 mb-1 text-primary">
+                                    {{ "%.1f"|format(performance.summarization.avg_score * 100) }}%
+                                </div>
+                                <div class="metric-label small text-muted">Average Score</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-box text-center p-3 bg-light rounded">
+                                <div class="metric-number h4 mb-1 text-success">
+                                    {{ "%.1f"|format(performance.summarization.accuracy_rate * 100) }}%
+                                </div>
+                                <div class="metric-label small text-muted">Accuracy Rate</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-box text-center p-3 bg-light rounded">
+                                <div class="metric-number h5 mb-1 text-info">
+                                    {{ performance.summarization.total_operations }}
+                                </div>
+                                <div class="metric-label small text-muted">Total Summaries</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-box text-center p-3 bg-light rounded">
+                                <div class="metric-status h4 mb-1">
+                                    {% if performance.summarization.meets_target %}
+                                        <i class="fas fa-check text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-times text-danger"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="metric-label small text-muted">Target Met</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Score Range:</small>
+                            <small class="text-muted">
+                                {{ "%.1f"|format(performance.summarization.min_score * 100) }}% - 
+                                {{ "%.1f"|format(performance.summarization.max_score * 100) }}%
+                            </small>
+                        </div>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar" 
+                                 style="width: {{ performance.summarization.avg_score * 100 }}%; background: var(--gradient-primary);"
+                                 role="progressbar">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Q&A Performance -->
+        {% if performance.qa %}
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header" style="background: var(--gradient-secondary); color: white;">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Question Answering Performance
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="metric-box text-center p-3 bg-light rounded">
+                                <div class="metric-number h4 mb-1 text-secondary">
+                                    {{ "%.1f"|format(performance.qa.avg_score * 100) }}%
+                                </div>
+                                <div class="metric-label small text-muted">Average Score</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-box text-center p-3 bg-light rounded">
+                                <div class="metric-number h4 mb-1 text-success">
+                                    {{ "%.1f"|format(performance.qa.accuracy_rate * 100) }}%
+                                </div>
+                                <div class="metric-label small text-muted">Accuracy Rate</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-box text-center p-3 bg-light rounded">
+                                <div class="metric-number h5 mb-1 text-info">
+                                    {{ performance.qa.total_operations }}
+                                </div>
+                                <div class="metric-label small text-muted">Total Q&As</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-box text-center p-3 bg-light rounded">
+                                <div class="metric-status h4 mb-1">
+                                    {% if performance.qa.meets_target %}
+                                        <i class="fas fa-check text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-times text-danger"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="metric-label small text-muted">Target Met</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">Score Range:</small>
+                            <small class="text-muted">
+                                {{ "%.1f"|format(performance.qa.min_score * 100) }}% - 
+                                {{ "%.1f"|format(performance.qa.max_score * 100) }}%
+                            </small>
+                        </div>
+                        <div class="progress mt-2" style="height: 8px;">
+                            <div class="progress-bar" 
+                                 style="width: {{ performance.qa.avg_score * 100 }}%; background: var(--gradient-secondary);"
+                                 role="progressbar">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Performance Guidelines -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-graduation-cap me-2 text-warning"></i>Performance Improvement Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Summarization Optimization</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Coverage: Key information preservation</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Coherence: Readability and flow</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Compression: 5-15% of original length</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Quality: Factual accuracy and relevance</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-secondary">Q&A Optimization</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Relevance: Direct question addressing</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Accuracy: Context-grounded responses</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Completeness: Full question coverage</li>
+                                <li><i class="fas fa-check-circle text-success me-2"></i>Clarity: Clear and coherent answers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-refresh performance data every 5 minutes
+setTimeout(function() {
+    if (document.visibilityState === 'visible') {
+        location.reload();
+    }
+}, 300000);
+
+// Add tooltips to metric boxes
+document.querySelectorAll('.metric-box').forEach(function(element) {
+    element.style.cursor = 'pointer';
+    element.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.02)';
+        this.style.transition = 'transform 0.2s ease';
+    });
+    element.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+});
+</script>
+{% endblock %}

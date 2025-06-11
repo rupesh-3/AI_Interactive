@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - AI Content Analyzer{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>Analysis Results
+                    </h2>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-link me-1"></i>
+                        <a href="{{ analysis.url }}" target="_blank" class="text-decoration-none">
+                            {{ analysis.url[:80] }}{% if analysis.url|length > 80 %}...{% endif %}
+                        </a>
+                    </p>
+                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    <i class="fas fa-plus me-1"></i>New Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column - Summary -->
+        <div class="col-lg-8 mb-4">
+            <!-- Article Info -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-file-alt me-2"></i>{{ analysis.title or 'Article Summary' }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if content_data %}
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-4">
+                            <div class="stat-item text-center p-2 bg-light rounded">
+                                <div class="stat-number text-primary fw-bold">{{ content_data.word_count }}</div>
+                                <div class="stat-label small text-muted">Words</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="stat-item text-center p-2 bg-light rounded">
+                                <div class="stat-number text-success fw-bold">{{ content_data.char_count }}</div>
+                                <div class="stat-label small text-muted">Characters</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="stat-item text-center p-2 bg-light rounded">
+                                <div class="stat-number text-info fw-bold">{{ analysis.created_at.strftime('%m/%d/%Y') }}</div>
+                                <div class="stat-label small text-muted">Analyzed</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <h5 class="text-primary mb-3">
+                        <i class="fas fa-compress-alt me-2"></i>AI Generated Summary
+                    </h5>
+                    <div class="summary-content p-3 bg-light rounded">
+                        {{ analysis.summary }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q&A Section Results -->
+            {% if show_qa and question_answer %}
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-question-circle me-2"></i>Question & Answer
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="question-section mb-4">
+                        <h6 class="text-success mb-2">
+                            <i class="fas fa-question me-1"></i>Question:
+                        </h6>
+                        <p class="fw-semibold bg-light p-3 rounded">{{ question_answer.question }}</p>
+                    </div>
+                    
+                    <div class="answer-section">
+                        <h6 class="text-primary mb-2">
+                            <i class="fas fa-comment me-1"></i>Answer:
+                        </h6>
+                        <div class="answer-content p-3 bg-primary bg-opacity-10 rounded">
+                            {{ question_answer.answer }}
+                        </div>
+                        
+                        <div class="answer-meta mt-2">
+                            <small class="text-muted">
+                                <i class="fas fa-cog me-1"></i>
+                                Complexity: <span class="fw-semibold">{{ question_answer.complexity_level.title() }}</span> | 
+                                Target Words: <span class="fw-semibold">{{ question_answer.word_count_preference }}</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column - Q&A Form -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-comments me-2"></i>Ask a Question
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('ask_question') }}" method="POST" id="questionForm">
+                        <input type="hidden" name="analysis_id" value="{{ analysis.id }}">
+                        
+                        <div class="mb-3">
+                            <label for="question" class="form-label fw-semibold">
+                                <i class="fas fa-question-circle me-1 text-info"></i>Your Question
+                            </label>
+                            <textarea 
+                                class="form-control" 
+                                id="question" 
+                                name="question" 
+                                rows="3" 
+                                placeholder="Ask anything about this content..."
+                                required
+                            ></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="word_count" class="form-label fw-semibold">
+                                <i class="fas fa-ruler me-1 text-primary"></i>Answer Length
+                            </label>
+                            <select class="form-select" id="word_count" name="word_count">
+                                <option value="50">Short (50 words)</option>
+                                <option value="100" selected>Medium (100 words)</option>
+                                <option value="200">Long (200 words)</option>
+                                <option value="300">Detailed (300 words)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="complexity" class="form-label fw-semibold">
+                                <i class="fas fa-layer-group me-1 text-success"></i>Complexity Level
+                            </label>
+                            <select class="form-select" id="complexity" name="complexity">
+                                <option value="simple">Simple</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="detailed">Detailed</option>
+                                <option value="academic">Academic</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-info" id="questionBtn">
+                                <i class="fas fa-search me-2"></i>Get Answer
+                                <span class="spinner-border spinner-border-sm ms-2 d-none" id="questionSpinner"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Previous Questions -->
+            {% if analysis.questions %}
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-secondary text-white">
+                    <h6 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Previous Questions
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for qa in analysis.questions[-5:] %}
+                        <div class="list-group-item">
+                            <div class="small fw-semibold text-primary mb-1">
+                                {{ qa.question[:50] }}{% if qa.question|length > 50 %}...{% endif %}
+                            </div>
+                            <div class="small text-muted">
+                                {{ qa.created_at.strftime('%m/%d/%Y %H:%M') }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Handle form submissions with loading states
+document.getElementById('questionForm').addEventListener('submit', function() {
+    const btn = document.getElementById('questionBtn');
+    const spinner = document.getElementById('questionSpinner');
+    
+    btn.disabled = true;
+    spinner.classList.remove('d-none');
+    btn.innerHTML = '<i class="fas fa-cog fa-spin me-2"></i>Processing...';
+});
+</script>
+{% endblock %}
